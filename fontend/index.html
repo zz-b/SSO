@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>index</title>
+  <script src="axios.min.js"></script>
+</head>
+<body>
+    <button onclick="fetchProtectedData()">获取保护资源</button>
+    <h1 id="h1"></h1>
+  <script>
+    // 从 URL 参数中获取令牌
+    const getTokenFromUrl = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get('token');
+    };
+
+    // 接收令牌并存储在 localStorage 中
+    const receiveToken = () => {
+        const token = getTokenFromUrl();
+        if (token) {
+            localStorage.setItem('token', token);
+        }
+    };
+
+    // 组件加载时接收令牌
+    receiveToken();
+
+    // 使用令牌访问受保护资源
+    const fetchProtectedData = async () => {
+        try {
+            // 从 localStorage 中获取令牌
+            const token = localStorage.getItem('token');
+            // 定义配置对象
+            const config = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}` // 示例：添加 Authorization 头
+                },
+                timeout: 5000, // 设置请求超时时间为 5 秒
+                responseType: 'json', // 设置响应类型为 JSON
+                withCredentials: true, // 设置允许携带凭证（如 Cookies）
+            };
+            // 向资源服务发送请求
+            const response = await axios.get('http://localhost:3002/protected',config);
+            alert('token合法，获取到了资源：' + response.data.data)
+            h1.innerText = response.data.data
+            console.log('Protected data:', response.data.data);
+        } catch (error) {
+            alert(error+"token不合法，即将跳转到登录页！")
+            window.location.href = 'http://project1.com:8082/'
+            console.error('Failed to fetch protected data:', error);
+        }
+    };
+
+    // 示例：获取受保护数据
+    fetchProtectedData();
+
+  </script>
+</body>
+</html>
